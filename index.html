@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PharmaStock – Offline Pharmacy & Warehouse Inventory</title>
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PharmaStock">
+<style>
+:root{--bg:#f1f5f9;--card:#fff;--tx:#0f172a;--mu:#64748b;--bd:#e2e8f0;--pr:#0f766e;--dg:#dc2626;--wn:#d97706;--ok:#16a34a;--sh:0 1px 3px rgba(0,0,0,.08)}
+[data-theme=dark]{--bg:#0b1220;--card:#111b2e;--tx:#e5e7eb;--mu:#94a3b8;--bd:#22304a;--sh:none}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+#app{display:flex;min-height:100vh}
+nav{width:210px;background:var(--card);border-right:1px solid var(--bd);padding:16px 10px;position:sticky;top:0;height:100vh;flex:none;z-index:20}
+.brand{font-weight:800;font-size:18px;color:var(--pr);padding:4px 10px 16px}
+nav button{display:flex;gap:10px;align-items:center;width:100%;background:none;border:0;color:var(--tx);padding:11px 12px;border-radius:10px;font:inherit;cursor:pointer;text-align:left;margin-bottom:2px}
+nav button .i{font-size:19px}
+nav button.on{background:var(--pr);color:#fff}
+main{flex:1;min-width:0;padding:18px 20px 100px;max-width:1200px;margin:0 auto;width:100%}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.top h1{font-size:22px;margin:0;flex:1}
+.badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;background:#dcfce7;color:#166534}
+.badge.off{background:#fee2e2;color:#991b1b}
+.badge.ok{background:#dcfce7;color:#166534}.badge.low{background:#fef3c7;color:#92400e}.badge.out{background:#fee2e2;color:#991b1b}
+.badge.in{background:#dbeafe;color:#1e40af}.badge.tr{background:#ede9fe;color:#5b21b6}.badge.mu{background:var(--bd);color:var(--mu)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;box-shadow:var(--sh);padding:14px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:15px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;box-shadow:var(--sh)}
+.stat small{color:var(--mu);font-weight:600}.stat b{display:block;font-size:26px;margin-top:2px}
+.stat.p b{color:#2563eb}.stat.w b{color:#7c3aed}.stat.t b{color:var(--pr)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}.bar>*{flex:1;min-width:130px}
+.chips{display:flex;gap:6px;margin-bottom:10px;overflow:auto}
+.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:6px 12px;border-radius:99px;cursor:pointer;font:inherit;font-size:13px;white-space:nowrap}
+.chip.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.tw{overflow:auto;padding:0}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap;vertical-align:middle}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mu);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.sub{display:block;font-size:12px;color:var(--mu)}
+.pos{color:var(--ok);font-weight:700}.neg{color:var(--dg);font-weight:700}
+tfoot td{font-weight:800;background:var(--bg)}
+.btn{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:9px 14px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--pr);color:#fff;border-color:var(--pr)}.btn.danger{background:var(--dg);color:#fff;border-color:var(--dg)}
+.btn.sm{padding:5px 9px;font-size:13px}.btn:active{transform:scale(.97)}
+.acts{display:flex;gap:4px}
+input,select,textarea{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);width:100%}
+label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--mu);font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.f2{grid-column:span 2}
+.hint{font-size:13px;color:var(--mu)}.hint.ok{color:var(--ok);font-weight:700}.hint.bad{color:var(--dg);font-weight:700}
+.splitrow{display:flex;gap:6px;flex-wrap:wrap}
+.overlay{position:fixed;inset:0;background:rgba(2,6,23,.55);display:flex;align-items:center;justify-content:center;padding:12px;z-index:100}
+.modal{background:var(--card);color:var(--tx);border-radius:16px;width:min(580px,100%);max-height:94vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.modal header{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--bd)}
+.modal header h3{margin:0;flex:1;font-size:17px}
+.x{background:none;border:0;color:var(--mu);font-size:20px;cursor:pointer}
+.mb{padding:16px;overflow:auto}
+.modal footer{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--bd)}
+.sheet{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sheet button{padding:18px 8px;font-size:15px;border-radius:14px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);cursor:pointer;font-weight:700}
+.sheet button span{display:block;font-size:28px}
+#fab{position:fixed;right:18px;bottom:22px;width:58px;height:58px;border-radius:50%;border:0;background:var(--pr);color:#fff;font-size:30px;box-shadow:0 6px 18px rgba(15,118,110,.5);cursor:pointer;z-index:30}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;z-index:200;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1}#toast.err{background:var(--dg)}
+ul.l{list-style:none;margin:0;padding:0}ul.l li{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd)}ul.l li:last-child{border:0}ul.l .g{flex:1;min-width:0}
+.empty{padding:26px;text-align:center;color:var(--mu)}
+.set{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:800px){
+ #app{display:block}
+ nav{position:fixed;bottom:0;left:0;right:0;top:auto;width:auto;height:auto;display:flex;border-top:1px solid var(--bd);border-right:0;padding:4px 4px max(4px,env(safe-area-inset-bottom))}
+ .brand{display:none}
+ nav button{flex-direction:column;gap:0;font-size:11px;padding:6px 2px;text-align:center;justify-content:center;margin:0}
+ main{padding:14px 12px 110px}#fab{bottom:82px}#toast{bottom:150px}
+ .two{grid-template-columns:1fr}.overlay{align-items:flex-end;padding:0}.modal{border-radius:18px 18px 0 0;width:100%}
+}
+@media print{nav,#fab,.bar,.chips,.acts,.noprint,#toast{display:none!important}main{padding:0}.card{box-shadow:none;border:0}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<div id="app">
+  <nav id="nav"></nav>
+  <main>
+    <div class="top"><h1 id="title"></h1><button class="btn sm primary" id="inst" data-a="install" style="display:none">⬇ Install</button><span id="net" class="badge"></span></div>
+    <div id="view"></div>
+  </main>
+</div>
+<button id="fab" data-a="new" title="New entry">＋</button>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ================= helpers ================= */
+const $=(s,e=document)=>e.querySelector(s);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
+const N=n=>(+n||0).toLocaleString();
+const money=n=>(S.settings.currency?S.settings.currency+' ':'')+(+n||0).toLocaleString(undefined,{maximumFractionDigits:2});
+const fdate=d=>d?new Date(d+'T00:00:00').toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'—';
+const daysTo=d=>d?Math.round((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5):null;
+const sgn=n=>n>0?`<span class="pos">+${N(n)}</span>`:n<0?`<span class="neg">−${N(-n)}</span>`:'<span class="hint">0</span>';
+const byExp=(a,b)=>(a.expiry||'9999-99').localeCompare(b.expiry||'9999-99');
+const entryCmp=(a,b)=>b.date.localeCompare(a.date)||b.ts-a.ts;
+
+/* ================= state ================= */
+const DEF={pharmacy:'Pharmacy',warehouse:'Warehouse',currency:'Rs',expiryDays:90,theme:'auto',lastBackup:''};
+let S={products:[],batches:[],entries:[],settings:{...DEF}};
+let ST={b:{},p:{}},PM={},BM={};
+const UI={view:'dash',q:'',f:'all',sort:'name',lf:{from:'',to:'',type:'',q:''},pq:''};
+const TYPES={RECEIVE:['Received','in'],TRANSFER:['Transfer','tr'],OUT:['Stock out','out'],COUNT:['Count','mu']};
+const FORMS=['Syrup','Tablet','Capsule','Injection','Drops','Cream / Ointment','Inhaler','Sachet','Suspension','Other'];
+const REASONS=['Sale / dispensed','Damaged','Expired (disposed)','Returned to distributor','Internal use / sample','Other'];
+
+/* ================= storage (IndexedDB + fallback) ================= */
+let _db;const idb=()=>_db||(_db=new Promise((res,rej)=>{const r=indexedDB.open('pharmastock',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+async function dbGet(k){try{const d=await idb();return await new Promise((res,rej)=>{const q=d.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}catch(e){const v=localStorage.getItem('ps_'+k);return v?JSON.parse(v):undefined}}
+async function dbSet(k,v){try{const d=await idb();await new Promise((res,rej)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})}catch(e){try{localStorage.setItem('ps_'+k,JSON.stringify(v))}catch(_){}}}
+let _t;const save=()=>{clearTimeout(_t);_t=setTimeout(flush,120)};const flush=()=>dbSet('state',S);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
+
+/* ================= calculations ================= */
+function balances(entries){const b={};for(const e of entries)for(const l of e.lines){const x=b[l.b]||(b[l.b]={p:0,w:0});x.p+=l.p||0;x.w+=l.w||0}return b}
+function recompute(){
+  PM={};BM={};S.products.forEach(p=>PM[p.id]=p);S.batches.forEach(b=>BM[b.id]=b);
+  const b=balances(S.entries),p={};
+  for(const pr of S.products)p[pr.id]={p:0,w:0,t:0,val:0,batches:[],exp:0,soon:0,next:null};
+  for(const bt of S.batches){
+    const q=b[bt.id],st=p[bt.productId];if(!q||!st||(q.p===0&&q.w===0))continue;
+    st.p+=q.p;st.w+=q.w;st.batches.push({...bt,p:q.p,w:q.w});
+    st.val+=(q.p+q.w)*(+bt.cost||+PM[bt.productId].cost||0);
+    if(bt.expiry){const d=daysTo(bt.expiry);if(d<0)st.exp+=q.p+q.w;else if(d<=S.settings.expiryDays)st.soon+=q.p+q.w;if(!st.next||bt.expiry<st.next)st.next=bt.expiry}
+  }
+  for(const id in p){p[id].t=p[id].p+p[id].w;p[id].batches.sort(byExp)}
+  ST={b,p};
+}
+function allocate(pid,loc,qty){ // FEFO
+  let need=qty;const lines=[];
+  for(const b of ST.p[pid].batches){const a=b[loc];if(a<=0)continue;const t=Math.min(a,need);lines.push({b:b.id,[loc]:-t});need-=t;if(need<=0)break}
+  return need>0?null:lines;
+}
+const status=(p,s)=>s.t<=0?['out','Out of stock']:s.t<=(+p.min||0)?['low','Low']:['ok','In stock'];
+const LN=l=>l==='p'?S.settings.pharmacy:S.settings.warehouse;
+function commit(msg){save();recompute();render();if(msg)toast(msg)}
+function toast(m,t){const e=$('#toast');e.textContent=m;e.className='show '+(t||'');clearTimeout(toast._t);toast._t=setTimeout(()=>e.className='',2600)}
+const err=m=>{toast(m,'err');return false};
+
+/* ================= modal ================= */
+function closeModal(){document.querySelectorAll('.overlay').forEach(o=>o.remove())}
+function modal(title,body,o={}){
+  closeModal();
+  const m=document.createElement('div');m.className='overlay';
+  m.innerHTML=`<form class="modal" autocomplete="off"><header><h3>${title}</h3><button type="button" class="x" data-close>✕</button></header><div class="mb">${body}</div>${o.onSave?`<footer><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">${o.label||'Save'}</button></footer>`:''}</form>`;
+  document.body.appendChild(m);
+  m.addEventListener('mousedown',e=>{if(e.target===m)closeModal()});
+  m.addEventListener('click',e=>{if(e.target.closest('[data-close]'))closeModal()});
+  m.querySelector('form').addEventListener('submit',e=>{e.preventDefault();if(o.onSave&&o.onSave(new FormData(e.target),e.target)!==false)closeModal()});
+  return m;
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+/* ================= product picker ================= */
+const plabel=p=>`${p.name}${p.strength?' '+p.strength:''}${p.form?' ('+p.form+')':''}${p.sku?' ['+p.sku+']':''}`;
+function picker(pid){
+  return `<label class="f2">Product*<input name="product" list="plist" required placeholder="Type to search medicine…" value="${pid&&PM[pid]?esc(plabel(PM[pid])):''}"></label>
+  <datalist id="plist">${S.products.map(p=>`<option value="${esc(plabel(p))}">`).join('')}</datalist>`;
+}
+function pidOf(v){v=(v||'').trim().toLowerCase();if(!v)return null;
+  let p=S.products.find(p=>plabel(p).toLowerCase()===v)||S.products.find(p=>(p.sku||'').toLowerCase()===v);
+  if(!p){const m=S.products.filter(p=>p.name.toLowerCase()===v);if(m.length===1)p=m[0]}
+  return p?p.id:null}
+const needProducts=()=>{if(!S.products.length){toast('Add a product first','err');go('products');setTimeout(()=>openProduct(),100);return true}return false};
+
+/* ================= entry forms ================= */
+function openNew(){
+  modal('New entry',`<div class="sheet">
+  <button type="button" data-a="receive"><span>📥</span>Receive from distributor</button>
+  <button type="button" data-a="transfer"><span>⇄</span>Transfer</button>
+  <button type="button" data-a="out"><span>📤</span>Stock out / sale</button>
+  <button type="button" data-a="count"><span>🧮</span>Stock count</button></div>`);
+}
+function openReceive(pid){
+  if(needProducts())return;
+  const m=modal('📥 Receive stock from distributor',`<div class="grid">${picker(pid)}
+  <label>Date<input type="date" name="date" value="${today()}" required></label>
+  <label>Total received*<input type="number" name="total" min="1" step="1" inputmode="numeric" required></label>
+  <label>→ ${esc(S.settings.pharmacy)}<input type="number" name="ph" min="0" step="1" value="0" inputmode="numeric"></label>
+  <label>→ ${esc(S.settings.warehouse)}<input type="number" name="wh" min="0" step="1" value="0" inputmode="numeric"></label>
+  <div class="f2 splitrow noprint"><button type="button" class="chip" data-split="p">All to ${esc(S.settings.pharmacy)}</button><button type="button" class="chip" data-split="h">Half / Half</button><button type="button" class="chip" data-split="w">All to ${esc(S.settings.warehouse)}</button></div>
+  <div class="f2 hint" id="sum"></div>
+  <label>Batch no.<input name="batch" placeholder="e.g. B2481"></label>
+  <label>Expiry date<input type="date" name="expiry"></label>
+  <label>Cost per unit<input type="number" name="cost" min="0" step="any" inputmode="decimal"></label>
+  <label>Invoice / ref no.<input name="ref"></label>
+  <label class="f2">Distributor / supplier<input name="supplier" list="sl" value="${esc(lastSupplier())}"></label>
+  <datalist id="sl">${[...new Set(S.entries.map(e=>e.supplier).filter(Boolean))].map(s=>`<option value="${esc(s)}">`).join('')}</datalist>
+  <label class="f2">Note<input name="note"></label></div>`,{label:'Save received stock',onSave(fd){
+    const pid=pidOf(fd.get('product'));if(!pid)return err('Choose a valid product');
+    const t=Math.round(+fd.get('total')),p=Math.round(+fd.get('ph'))||0,w=Math.round(+fd.get('wh'))||0;
+    if(!(t>0))return err('Enter total quantity');if(p<0||w<0||p+w!==t)return err(`Split must add up to ${t}`);
+    addReceive({pid,p,w,date:fd.get('date'),batch:fd.get('batch'),expiry:fd.get('expiry'),cost:fd.get('cost'),supplier:fd.get('supplier'),ref:fd.get('ref'),note:fd.get('note')});
+    commit(`Received ${t} → ${p} ${S.settings.pharmacy}, ${w} ${S.settings.warehouse}`);
+  }});
+  const f=m.querySelector('form'),E=f.elements;
+  const upd=()=>{const t=+E.total.value||0,p=+E.ph.value||0,w=+E.wh.value||0,s=$('#sum',m);const ok=t>0&&p+w===t;
+    s.className='f2 hint '+(t?ok?'ok':'bad':'');s.textContent=t?`${t} total = ${p} ${S.settings.pharmacy} + ${w} ${S.settings.warehouse} ${ok?'✔':'✖ must add up'}`:'Enter the total quantity, then split it.'};
+  f.addEventListener('input',e=>{const n=e.target.name,t=+E.total.value||0;
+    if(n==='total'||n==='ph')E.wh.value=Math.max(t-(+E.ph.value||0),0);
+    if(n==='wh')E.ph.value=Math.max(t-(+E.wh.value||0),0);upd()});
+  m.addEventListener('click',e=>{const b=e.target.closest('[data-split]');if(!b)return;const t=+E.total.value||0,k=b.dataset.split;
+    E.ph.value=k==='p'?t:k==='h'?Math.ceil(t/2):0;E.wh.value=t-E.ph.value;upd()});
+  upd();
+}
+const lastSupplier=()=>{const e=[...S.entries].reverse().find(e=>e.supplier);return e?e.supplier:''};
+function addReceive(o){
+  const batch=(o.batch||'').trim()||'—',expiry=o.expiry||'',cost=o.cost===''||o.cost==null?'':+o.cost;
+  let bt=S.batches.find(x=>x.productId===o.pid&&x.no===batch&&(x.expiry||'')===expiry&&(x.cost===''?'':+x.cost)===cost);
+  if(!bt){bt={id:uid(),productId:o.pid,no:batch,expiry,cost};S.batches.push(bt)}
+  S.entries.push({id:uid(),ts:Date.now(),date:o.date||today(),type:'RECEIVE',pid:o.pid,lines:[{b:bt.id,p:o.p,w:o.w}],total:o.p+o.w,supplier:(o.supplier||'').trim(),ref:(o.ref||'').trim(),note:(o.note||'').trim()});
+}
+const availTxt=(pid,loc)=>pid?`Available in ${LN(loc)}: <b>${N(ST.p[pid].[loc])}</b>`:'';
+function openMove(kind,pid){
+  if(needProducts())return;
+  const tr=kind==='TRANSFER';
+  const m=modal(tr?'⇄ Transfer stock':'📤 Stock out',`<div class="grid">${picker(pid)}
+  <label>Date<input type="date" name="date" value="${today()}" required></label>
+  <label>Quantity*<input type="number" name="qty" min="1" step="1" required inputmode="numeric"></label>
+  ${tr?`<label class="f2">Direction<select name="dir"><option value="w">${esc(S.settings.warehouse)} → ${esc(S.settings.pharmacy)}</option><option value="p">${esc(S.settings.pharmacy)} → ${esc(S.settings.warehouse)}</option></select></label>`
+  :`<label>Take from<select name="dir"><option value="p">${esc(S.settings.pharmacy)}</option><option value="w">${esc(S.settings.warehouse)}</option></select></label>
+  <label>Reason<select name="reason">${REASONS.map(r=>`<option>${r}</option>`).join('')}</select></label>
+  <label class="f2">Customer / reference<input name="party"></label>`}
+  <div class="f2 hint" id="av"></div>
+  <label class="f2">Note<input name="note"></label></div>`,{label:tr?'Transfer':'Save',onSave(fd){
+    const pid=pidOf(fd.get('product'));if(!pid)return err('Choose a valid product');
+    const q=Math.round(+fd.get('qty')),from=fd.get('dir');if(!(q>0))return err('Enter quantity');
+    const lines=allocate(pid,from,q);if(!lines)return err(`Not enough stock in ${LN(from)} (have ${ST.p[pid][from]})`);
+    const e={id:uid(),ts:Date.now(),date:fd.get('date'),type:kind,pid,note:(fd.get('note')||'').trim(),qty:q,from};
+    if(tr){const to=from==='p'?'w':'p';e.lines=lines.map(l=>({b:l.b,[from]:l[from],[to]:-l[from]}))}
+    else{e.lines=lines;e.reason=fd.get('reason');e.party=(fd.get('party')||'').trim()}
+    S.entries.push(e);commit(tr?`Moved ${q} to ${LN(from==='p'?'w':'p')}`:`Removed ${q} from ${LN(from)}`);
+  }});
+  const f=m.querySelector('form'),E=f.elements;
+  const av=()=>{$('#av',m).innerHTML=availTxt(pidOf(E.product.value),E.dir.value)};
+  f.addEventListener('input',av);f.addEventListener('change',av);av();
+}
+function openCount(pid){
+  if(needProducts())return;
+  const m=modal('🧮 Stock count / adjustment',`<div class="grid">${picker(pid)}
+  <label class="f2">Date<input type="date" name="date" value="${today()}" required></label>
+  <div class="f2 hint" id="sys"></div>
+  <label>Counted in ${esc(S.settings.pharmacy)}<input type="number" name="cp" min="0" step="1" required></label>
+  <label>Counted in ${esc(S.settings.warehouse)}<input type="number" name="cw" min="0" step="1" required></label>
+  <label class="f2">Note<input name="note" placeholder="e.g. monthly stock take"></label></div>`,{label:'Apply count',onSave(fd){
+    const pid=pidOf(fd.get('product'));if(!pid)return err('Choose a valid product');
+    const cp=Math.round(+fd.get('cp')),cw=Math.round(+fd.get('cw')),s=ST.p[pid],lines=[];
+    if(cp<0||cw<0||isNaN(cp)||isNaN(cw))return err('Enter counted quantities');
+    for(const [loc,d] of [['p',cp-s.p],['w',cw-s.w]]){
+      if(d<0)lines.push(...allocate(pid,loc,-d));
+      else if(d>0){let b=S.batches.find(x=>x.productId===pid&&x.no==='ADJ');if(!b){b={id:uid(),productId:pid,no:'ADJ',expiry:'',cost:''};S.batches.push(b)}lines.push({b:b.id,[loc]:d})}}
+    if(!lines.length)return err('Counts match system — nothing to adjust');
+    S.entries.push({id:uid(),ts:Date.now(),date:fd.get('date'),type:'COUNT',pid,lines,note:(fd.get('note')||'').trim()});
+    commit('Stock count applied');
+  }});
+  const f=m.querySelector('form'),E=f.elements;
+  const fill=()=>{const id=pidOf(E.product.value),s=$('#sys',m);if(!id){s.textContent='';return}const x=ST.p[id];
+    s.innerHTML=`System stock: <b>${N(x.p)}</b> ${esc(S.settings.pharmacy)} · <b>${N(x.w)}</b> ${esc(S.settings.warehouse)}`;E.cp.value=x.p;E.cw.value=x.w};
+  E.product.addEventListener('input',fill);fill();
+}
+function openProduct(id){
+  const p=id?PM[id]:{unit:'pcs',min:10};
+  modal(id?'Edit product':'New product',`<div class="grid">
+  <label class="f2">Name*<input name="name" required value="${esc(p.name)}" placeholder="e.g. Paracetamol Syrup"></label>
+  <label>Strength / size<input name="strength" value="${esc(p.strength)}" placeholder="120 ml / 500 mg"></label>
+  <label>Form<select name="form">${FORMS.map(f=>`<option ${f===p.form?'selected':''}>${f}</option>`).join('')}</select></label>
+  <label>Unit<input name="unit" value="${esc(p.unit)}" placeholder="bottle, strip, box"></label>
+  <label>Reorder level (low stock)<input type="number" name="min" min="0" value="${esc(p.min)}"></label>
+  <label>Manufacturer / company<input name="mfr" value="${esc(p.mfr)}"></label>
+  <label>SKU / barcode<input name="sku" value="${esc(p.sku)}"></label>
+  <label>Cost price<input type="number" name="cost" min="0" step="any" value="${esc(p.cost)}"></label>
+  <label>Selling price<input type="number" name="price" min="0" step="any" value="${esc(p.price)}"></label>
+  <label>Rack – ${esc(S.settings.pharmacy)}<input name="rackP" value="${esc(p.rackP)}"></label>
+  <label>Rack – ${esc(S.settings.warehouse)}<input name="rackW" value="${esc(p.rackW)}"></label></div>`,{onSave(fd){
+    const o={name:fd.get('name').trim(),strength:fd.get('strength').trim(),form:fd.get('form'),unit:fd.get('unit').trim()||'pcs',min:+fd.get('min')||0,mfr:fd.get('mfr').trim(),sku:fd.get('sku').trim(),cost:fd.get('cost'),price:fd.get('price'),rackP:fd.get('rackP').trim(),rackW:fd.get('rackW').trim()};
+    if(!o.name)return err('Name required');
+    if(id)Object.assign(PM[id],o);else S.products.push({id:uid(),...o});
+    commit('Product saved');
+  }});
+}
+function delProduct(id){
+  if(S.entries.some(e=>e.pid===id))return toast('This product has history – cannot delete','err');
+  if(!confirm('Delete product "'+PM[id].name+'"?'))return;
+  S.products=S.products.filter(p=>p.id!==id);S.batches=S.batches.filter(b=>b.productId!==id);commit('Deleted');
+}
+function delEntry(id){
+  if(!confirm('Delete this entry? Stock will be recalculated.'))return;
+  const rest=S.entries.filter(e=>e.id!==id),b=balances(rest);
+  if(Object.values(b).some(x=>x.p<0||x.w<0))return toast('Cannot delete: later entries depend on this stock','err');
+  S.entries=rest;commit('Entry deleted');
+}
+function openDetail(id){
+  const p=PM[id],s=ST.p[id],[sc,sl]=status(p,s);
+  const hist=S.entries.filter(e=>e.pid===id).sort(entryCmp).slice(0,12);
+  const m=modal(esc(p.name),`<p class="hint" style="margin-top:0">${esc([p.strength,p.form,p.mfr,p.sku&&'SKU '+p.sku].filter(Boolean).join(' · '))}<br>
+  Racks: ${esc(S.settings.pharmacy)} ${esc(p.rackP||'—')} · ${esc(S.settings.warehouse)} ${esc(p.rackW||'—')}</p>
+  <div class="cards"><div class="stat p"><small>${esc(S.settings.pharmacy)}</small><b>${N(s.p)}</b></div><div class="stat w"><small>${esc(S.settings.warehouse)}</small><b>${N(s.w)}</b></div><div class="stat t"><small>Total <span class="badge ${sc}">${sl}</span></small><b>${N(s.t)}</b></div></div>
+  <h3>Batches</h3><div class="tw card"><table><thead><tr><th>Batch</th><th>Expiry</th><th class="num">${esc(S.settings.pharmacy)}</th><th class="num">${esc(S.settings.warehouse)}</th></tr></thead><tbody>
+  ${s.batches.map(b=>`<tr><td>${esc(b.no)}</td><td>${expBadge(b.expiry)}</td><td class="num">${N(b.p)}</td><td class="num">${N(b.w)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No stock</td></tr>'}</tbody></table></div>
+  <h3>Recent activity</h3><ul class="l">${hist.map(entryLi).join('')||'<li class="hint">No activity yet</li>'}</ul>
+  <div class="row noprint" style="margin-top:12px"><button type="button" class="btn sm" data-a="receive" data-id="${id}">📥 Receive</button><button type="button" class="btn sm" data-a="transfer" data-id="${id}">⇄ Transfer</button><button type="button" class="btn sm" data-a="out" data-id="${id}">📤 Out</button><button type="button" class="btn sm" data-a="count" data-id="${id}">🧮 Count</button><button type="button" class="btn sm" data-a="editp" data-id="${id}">✏️ Edit</button></div>`);
+}
+function expBadge(d){if(!d)return '<span class="hint">—</span>';const n=daysTo(d);
+  return `${fdate(d)} <span class="badge ${n<0?'out':n<=S.settings.expiryDays?'low':'ok'}">${n<0?'Expired':n+'d'}</span>`}
+
+/* ================= entry helpers ================= */
+function delta(e){return e.lines.reduce((a,l)=>(a.p+=l.p||0,a.w+=l.w||0,a),{p:0,w:0})}
+function entryDesc(e){
+  const bn=[...new Set(e.lines.map(l=>BM[l.b]?.no).filter(x=>x&&x!=='—'))].join(', ');
+  if(e.type==='RECEIVE')return [e.supplier,e.ref&&'Inv '+e.ref,bn&&'Batch '+bn,e.note].filter(Boolean).join(' · ');
+  if(e.type==='TRANSFER')return [`${LN(e.from)} → ${LN(e.from==='p'?'w':'p')}`,bn&&'Batch '+bn,e.note].filter(Boolean).join(' · ');
+  if(e.type==='OUT')return [e.reason,`from ${LN(e.from)}`,e.party,bn&&'Batch '+bn,e.note].filter(Boolean).join(' · ');
+  return e.note||'Stock count adjustment';
+}
+function entryLi(e){const d=delta(e),[l,c]=TYPES[e.type];
+  return `<li><span class="badge ${c}">${l}</span><div class="g"><b>${esc(PM[e.pid]?.name||'(deleted)')}</b><span class="sub">${fdate(e.date)} · ${esc(entryDesc(e))}</span></div><div style="text-align:right;font-size:13px">P ${sgn(d.p)}<br>W ${sgn(d.w)}</div></li>`}
+
+/* ================= views ================= */
+function vDash(){
+  let P=0,W=0,V=0,low=[],out=0,al=[];
+  for(const p of S.products){const s=ST.p[p.id];P+=s.p;W+=s.w;V+=s.val;
+    if(s.t<=0)out++;else if(s.t<=(+p.min||0))low.push([p,s]);
+    for(const b of s.batches)if(b.expiry){const d=daysTo(b.expiry);if(d<=S.settings.expiryDays)al.push({p,b,d})}}
+  al.sort((a,b)=>a.d-b.d);
+  const td=today(),inToday=S.entries.filter(e=>e.date===td&&e.type==='RECEIVE').reduce((a,e)=>a+e.total,0);
+  const rec=[...S.entries].sort(entryCmp).slice(0,8);
+  return `<div class="cards">
+  <div class="stat p"><small>${esc(S.settings.pharmacy)} units</small><b>${N(P)}</b></div>
+  <div class="stat w"><small>${esc(S.settings.warehouse)} units</small><b>${N(W)}</b></div>
+  <div class="stat t"><small>Total units</small><b>${N(P+W)}</b></div>
+  <div class="stat"><small>Stock value (cost)</small><b style="font-size:21px">${money(V)}</b></div>
+  <div class="stat"><small>Products</small><b>${S.products.length}</b></div>
+  <div class="stat"><small>Received today</small><b>${N(inToday)}</b></div></div>
+  <div class="two"><div class="card"><h3>⚠️ Low / out of stock (${low.length+out})</h3><ul class="l">
+  ${low.sort((a,b)=>a[1].t-b[1].t).slice(0,8).map(([p,s])=>`<li data-a="detail" data-id="${p.id}" style="cursor:pointer"><div class="g"><b>${esc(p.name)}</b><span class="sub">${esc(p.strength||'')}</span></div><span class="badge low">${N(s.t)} left</span></li>`).join('')}
+  ${out?`<li><span class="badge out">${out}</span><div class="g">product(s) out of stock</div></li>`:''}
+  ${!low.length&&!out?'<li class="hint">All good ✔</li>':''}</ul></div>
+  <div class="card"><h3>⏳ Expiring within ${S.settings.expiryDays} days (${al.length})</h3><ul class="l">
+  ${al.slice(0,8).map(a=>`<li data-a="detail" data-id="${a.p.id}" style="cursor:pointer"><div class="g"><b>${esc(a.p.name)}</b><span class="sub">Batch ${esc(a.b.no)} · ${N(a.b.p+a.b.w)} units</span></div>${expBadge(a.b.expiry)}</li>`).join('')||'<li class="hint">Nothing expiring soon ✔</li>'}</ul></div></div>
+  <div class="card"><h3>Recent activity</h3><ul class="l">${rec.map(entryLi).join('')||'<li class="empty">No activity yet. Tap ＋ to receive your first stock, or load demo data in Settings.</li>'}</ul></div>`;
+}
+function vStock(){
+  return `<div class="bar"><input id="q" type="search" placeholder="🔍 Search name, company, SKU…" value="${esc(UI.q)}"><select id="sort">
+  ${[['name','Sort: Name'],['t_asc','Total: low → high'],['t_desc','Total: high → low'],['exp','Nearest expiry']].map(([k,l])=>`<option value="${k}" ${UI.sort===k?'selected':''}>${l}</option>`).join('')}</select>
+  <button class="btn noprint" data-a="print">🖨 Print</button><button class="btn noprint" data-a="csvStock">⬇ CSV</button></div>
+  <div class="chips">${[['all','All'],['low','Low'],['out','Out'],['soon','Expiring soon'],['exp','Expired']].map(([k,l])=>`<button class="chip ${UI.f===k?'on':''}" data-a="chip" data-k="${k}">${l}</button>`).join('')}</div>
+  <div class="card tw" id="rows"></div>`;
+}
+function stockList(){
+  const q=UI.q.toLowerCase();
+  let l=S.products.map(p=>({p,s:ST.p[p.id]})).filter(({p,s})=>{
+    if(q&&![p.name,p.strength,p.mfr,p.sku,p.form].join(' ').toLowerCase().includes(q))return false;
+    return UI.f==='all'||(UI.f==='low'&&s.t>0&&s.t<=(+p.min||0))||(UI.f==='out'&&s.t<=0)||(UI.f==='soon'&&s.soon>0)||(UI.f==='exp'&&s.exp>0)});
+  const k=UI.sort;
+  l.sort((a,b)=>k==='t_asc'?a.s.t-b.s.t:k==='t_desc'?b.s.t-a.s.t:k==='exp'?(a.s.next||'9').localeCompare(b.s.next||'9'):a.p.name.localeCompare(b.p.name));
+  return l;
+}
+function fillStock(){
+  const l=stockList();let P=0,W=0,V=0;l.forEach(({s})=>{P+=s.p;W+=s.w;V+=s.val});
+  $('#rows').innerHTML=l.length?`<table><thead><tr><th>Product</th><th class="num">${esc(S.settings.pharmacy)}</th><th class="num">${esc(S.settings.warehouse)}</th><th class="num">Total</th><th>Status</th><th>Expiry</th><th class="noprint"></th></tr></thead><tbody>
+  ${l.map(({p,s})=>{const [c,t]=status(p,s);return `<tr><td><b>${esc(p.name)}</b><span class="sub">${esc([p.strength,p.form,p.mfr].filter(Boolean).join(' · '))}</span></td>
+  <td class="num">${N(s.p)}</td><td class="num">${N(s.w)}</td><td class="num"><b>${N(s.t)}</b> <span class="sub">${esc(p.unit||'')}</span></td>
+  <td><span class="badge ${c}">${t}</span></td><td>${s.next?expBadge(s.next):'—'}</td>
+  <td class="noprint"><div class="acts"><button class="btn sm" title="Receive" data-a="receive" data-id="${p.id}">📥</button><button class="btn sm" title="Transfer" data-a="transfer" data-id="${p.id}">⇄</button><button class="btn sm" title="Stock out" data-a="out" data-id="${p.id}">📤</button><button class="btn sm" title="Details" data-a="detail" data-id="${p.id}">🔍</button></div></td></tr>`}).join('')}
+  </tbody><tfoot><tr><td>Totals (${l.length} items) · value ${money(V)}</td><td class="num">${N(P)}</td><td class="num">${N(W)}</td><td class="num">${N(P+W)}</td><td colspan="3"></td></tr></tfoot></table>`
+  :'<div class="empty">No products match. Add products in the Products tab.</div>';
+}
+function ledgerList(){
+  const f=UI.lf,q=f.q.toLowerCase();
+  return S.entries.filter(e=>(!f.from||e.date>=f.from)&&(!f.to||e.date<=f.to)&&(!f.type||e.type===f.type)&&(!q||((PM[e.pid]?.name||'')+' '+entryDesc(e)).toLowerCase().includes(q))).sort(entryCmp);
+}
+function vLedger(){
+  const f=UI.lf;
+  return `<div class="bar"><label>From<input type="date" id="lf" value="${f.from}"></label><label>To<input type="date" id="lt" value="${f.to}"></label>
+  <label>Type<select id="ltype"><option value="">All</option>${Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${f.type===k?'selected':''}>${v[0]}</option>`).join('')}</select></label>
+  <label>Search<input id="lq" type="search" value="${esc(f.q)}" placeholder="product, supplier…"></label></div>
+  <div class="row noprint" style="margin-bottom:10px"><button class="btn" data-a="csvLedger">⬇ Export CSV</button><button class="btn" data-a="print">🖨 Print</button></div>
+  <div class="card tw" id="lrows"></div>`;
+}
+function fillLedger(){
+  const l=ledgerList();let rp=0,rw=0;
+  $('#lrows').innerHTML=l.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Product</th><th>Details</th><th class="num">${esc(S.settings.pharmacy)} Δ</th><th class="num">${esc(S.settings.warehouse)} Δ</th><th class="noprint"></th></tr></thead><tbody>
+  ${l.map(e=>{const d=delta(e),[t,c]=TYPES[e.type];if(e.type==='RECEIVE'){rp+=d.p;rw+=d.w}
+  return `<tr><td>${fdate(e.date)}<span class="sub">${new Date(e.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></td><td><span class="badge ${c}">${t}</span>${e.type==='RECEIVE'?`<span class="sub">total ${N(e.total)}</span>`:''}</td>
+  <td><b>${esc(PM[e.pid]?.name||'(deleted)')}</b></td><td style="white-space:normal;min-width:180px">${esc(entryDesc(e))}</td><td class="num">${sgn(d.p)}</td><td class="num">${sgn(d.w)}</td>
+  <td class="noprint"><button class="btn sm" data-a="delentry" data-id="${e.id}" title="Delete">🗑</button></td></tr>`}).join('')}</tbody></table>`:'<div class="empty">No entries found.</div>';
+}
+function vProducts(){
+  return `<div class="bar"><input id="pq" type="search" placeholder="🔍 Search products…" value="${esc(UI.pq)}"><button class="btn primary" data-a="newp" style="flex:none">＋ Add product</button></div><div class="card tw" id="prows"></div>`;
+}
+function fillProducts(){
+  const q=UI.pq.toLowerCase(),l=S.products.filter(p=>!q||[p.name,p.strength,p.mfr,p.sku].join(' ').toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
+  $('#prows').innerHTML=l.length?`<table><thead><tr><th>Product</th><th>Form</th><th>SKU</th><th class="num">Reorder</th><th class="num">Cost</th><th class="num">Price</th><th>Racks (P / W)</th><th></th></tr></thead><tbody>
+  ${l.map(p=>`<tr><td><b>${esc(p.name)}</b><span class="sub">${esc([p.strength,p.mfr].filter(Boolean).join(' · '))}</span></td><td>${esc(p.form||'')}</td><td>${esc(p.sku||'')}</td><td class="num">${N(p.min)}</td><td class="num">${p.cost!==''&&p.cost!=null?money(p.cost):'—'}</td><td class="num">${p.price!==''&&p.price!=null?money(p.price):'—'}</td><td>${esc(p.rackP||'—')} / ${esc(p.rackW||'—')}</td>
+  <td><div class="acts"><button class="btn sm" data-a="editp" data-id="${p.id}">✏️</button><button class="btn sm" data-a="delp" data-id="${p.id}">🗑</button></div></td></tr>`).join('')}</tbody></table>`:'<div class="empty">No products yet. Tap “Add product”.</div>';
+}
+let deferred=null;
+function vSettings(){
+  const s=S.settings;
+  return `<div class="card"><h3>General</h3><div class="set">
+  <label>Pharmacy name<input data-set="pharmacy" value="${esc(s.pharmacy)}"></label><label>Warehouse name<input data-set="warehouse" value="${esc(s.warehouse)}"></label>
+  <label>Currency symbol<input data-set="currency" value="${esc(s.currency)}"></label><label>Expiry warning (days)<input type="number" data-set="expiryDays" min="1" value="${s.expiryDays}"></label>
+  <label>Theme<select data-set="theme">${['auto','light','dark'].map(t=>`<option ${s.theme===t?'selected':''}>${t}</option>`).join('')}</select></label></div></div>
+  <div class="card"><h3>Backup & data</h3><p class="hint" style="margin-top:0">All data lives only on this device. Export a backup regularly${s.lastBackup?` (last: ${fdate(s.lastBackup)})`:''}.</p>
+  <div class="row"><button class="btn primary" data-a="backup">⬇ Backup (JSON)</button><button class="btn" data-a="restore">⬆ Restore backup</button><button class="btn" data-a="csvStock">Stock CSV</button><button class="btn" data-a="csvLedger">History CSV</button></div>
+  <input type="file" id="file" accept=".json,application/json" hidden>
+  <div class="row" style="margin-top:10px"><button class="btn" data-a="demo">Load demo data</button><button class="btn danger" data-a="wipe">Erase all data</button></div></div>
+  <div class="card"><h3>App</h3><p class="hint" style="margin-top:0">Status: <b>${navigator.onLine?'online':'offline'}</b> · Offline engine: <b id="swst">checking…</b></p>
+  ${deferred?'<button class="btn primary" data-a="install">⬇ Install app</button>':'<p class="hint">Install via your browser menu → “Install app / Add to Home screen”.</p>'}
+  <p class="hint" id="stor"></p></div>`;
+}
+const VIEWS={dash:['Dashboard','🏠',vDash],stock:['Stock','📦',vStock],ledger:['History','📒',vLedger],products:['Products','💊',vProducts],settings:['Settings','⚙️',vSettings]};
+function go(v){UI.view=v;render();scrollTo(0,0)}
+function render(){
+  $('#nav').innerHTML='<div class="brand">℞ PharmaStock</div>'+Object.entries(VIEWS).map(([k,[l,i]])=>`<button class="${UI.view===k?'on':''}" data-a="nav" data-v="${k}"><span class="i">${i}</span>${l}</button>`).join('');
+  $('#title').textContent=VIEWS[UI.view][0];
+  $('#view').innerHTML=VIEWS[UI.view][2]();
+  if(UI.view==='stock'){fillStock();$('#q').oninput=e=>{UI.q=e.target.value;fillStock()};$('#sort').onchange=e=>{UI.sort=e.target.value;fillStock()}}
+  if(UI.view==='ledger'){fillLedger();const u=()=>{UI.lf={from:$('#lf').value,to:$('#lt').value,type:$('#ltype').value,q:$('#lq').value};fillLedger()};['lf','lt','ltype','lq'].forEach(i=>$('#'+i).oninput=u)}
+  if(UI.view==='products'){fillProducts();$('#pq').oninput=e=>{UI.pq=e.target.value;fillProducts()}}
+  if(UI.view==='settings'){
+    navigator.serviceWorker?.getRegistration().then(r=>{const e=$('#swst');if(e)e.textContent=r&&r.active?'ready ✔':'not active (host over HTTPS with sw.js)'});
+    navigator.storage?.estimate?.().then(x=>{const e=$('#stor');if(e)e.textContent=`Storage used: ${(x.usage/1048576).toFixed(2)} MB`});
+  }
+}
+
+/* ================= exports ================= */
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+const csv=rows=>'\ufeff'+rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+function csvStock(){download(`stock-${today()}.csv`,csv([['Product','Strength','Form','Manufacturer','SKU',S.settings.pharmacy,S.settings.warehouse,'Total','Reorder level','Value','Nearest expiry'],...S.products.map(p=>{const s=ST.p[p.id];return [p.name,p.strength,p.form,p.mfr,p.sku,s.p,s.w,s.t,p.min,s.val,s.next||'']})]),'text/csv')}
+function csvLedger(){download(`history-${today()}.csv`,csv([['Date','Type','Product','Details',S.settings.pharmacy+' change',S.settings.warehouse+' change'],...ledgerList().map(e=>{const d=delta(e);return [e.date,TYPES[e.type][0],PM[e.pid]?.name||'',entryDesc(e),d.p,d.w]})]),'text/csv')}
+function backup(){S.settings.lastBackup=today();save();download(`pharmastock-backup-${today()}.json`,JSON.stringify(S,null,1),'application/json');render()}
+function restore(file){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.products)||!Array.isArray(d.entries)||!Array.isArray(d.batches))throw 0;
+  if(!confirm('Replace ALL current data with this backup?'))return;S={products:d.products,batches:d.batches,entries:d.entries,settings:{...DEF,...d.settings}};applyTheme();commit('Backup restored')}catch(e){toast('Invalid backup file','err')}};r.readAsText(file)}
+function demo(){
+  if(S.products.length&&!confirm('Add demo products to existing data?'))return;
+  const mk=(name,strength,form,unit,min,cost,price,mfr)=>{const p={id:uid(),name,strength,form,unit,min,cost,price,mfr,sku:'',rackP:'',rackW:''};S.products.push(p);return p.id};
+  const d=n=>{const x=new Date();x.setDate(x.getDate()+n);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10)};
+  const a=mk('Paracetamol Syrup','120 ml','Syrup','bottle',20,60,90,'GSK'),b=mk('Amoxicillin','500 mg','Capsule','strip',30,80,120,'Sandoz'),c=mk('Cough Syrup','100 ml','Syrup','bottle',15,70,110,'Abbott'),e=mk('ORS','20.5 g','Sachet','box',10,25,40,'Pharmatec'),f=mk('Ibuprofen','400 mg','Tablet','strip',25,35,55,'Reckitt');
+  addReceive({pid:a,p:50,w:50,date:d(-20),batch:'PS-101',expiry:d(400),cost:60,supplier:'City Distributors',ref:'INV-2041'});
+  addReceive({pid:b,p:40,w:80,date:d(-15),batch:'AM-77',expiry:d(60),cost:80,supplier:'MediLine',ref:'INV-2050'});
+  addReceive({pid:c,p:10,w:5,date:d(-10),batch:'CS-9',expiry:d(200),cost:70,supplier:'City Distributors',ref:'INV-2066'});
+  addReceive({pid:e,p:5,w:0,date:d(-5),batch:'OR-3',expiry:d(-10),cost:25,supplier:'MediLine',ref:'INV-2070'});
+  addReceive({pid:f,p:60,w:140,date:d(-3),batch:'IB-5',expiry:d(500),cost:35,supplier:'MediLine',ref:'INV-2081'});
+  recompute();
+  const al=allocate(a,'p',12);S.entries.push({id:uid(),ts:Date.now(),date:today(),type:'OUT',pid:a,lines:al,qty:12,from:'p',reason:'Sale / dispensed',party:'Counter sales',note:''});
+  const tl=allocate(b,'w',20).map(l=>({b:l.b,w:l.w,p:-l.w}));S.entries.push({id:uid(),ts:Date.now()+1,date:today(),type:'TRANSFER',pid:b,lines:tl,qty:20,from:'w',note:'Refill shelf'});
+  commit('Demo data loaded');
+}
+function applyTheme(){const t=S.settings.theme;document.documentElement.dataset.theme=t==='auto'?(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):t}
+
+/* ================= events ================= */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a,id=el.dataset.id;
+  ({nav:()=>go(el.dataset.v),new:openNew,receive:()=>openReceive(id),transfer:()=>openMove('TRANSFER',id),out:()=>openMove('OUT',id),count:()=>openCount(id),
+    detail:()=>openDetail(id),newp:()=>openProduct(),editp:()=>openProduct(id),delp:()=>delProduct(id),delentry:()=>delEntry(id),
+    chip:()=>{UI.f=el.dataset.k;render()},print:()=>print(),csvStock,csvLedger,backup,demo,
+    restore:()=>{const f=$('#file');f.onchange=()=>{if(f.files[0])restore(f.files[0])};f.click()},
+    wipe:()=>{if(prompt('Type DELETE to erase all data on this device')==='DELETE'){S={products:[],batches:[],entries:[],settings:{...DEF}};commit('All data erased')}},
+    install:async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null;$('#inst').style.display='none'}}}[a]||(()=>{}))();
+});
+document.addEventListener('change',e=>{const k=e.target.dataset?.set;if(!k)return;
+  S.settings[k]=k==='expiryDays'?Math.max(1,+e.target.value||90):e.target.value;applyTheme();commit('Saved')});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('#inst').style.display=''});
+addEventListener('appinstalled',()=>{$('#inst').style.display='none';toast('App installed')});
+const net=()=>{const n=$('#net');n.textContent=navigator.onLine?'● Online':'● Offline';n.className='badge '+(navigator.onLine?'':'off')};
+addEventListener('online',net);addEventListener('offline',net);
+
+/* ================= PWA: icons + manifest (generated, no extra files) ================= */
+function icon(sz){const c=document.createElement('canvas');c.width=c.height=sz;const g=c.getContext('2d');
+  g.fillStyle='#0f766e';g.fillRect(0,0,sz,sz);g.fillStyle='#fff';const t=sz*.16,l=sz*.58,o=(sz-l)/2;
+  g.fillRect(sz/2-t/2,o,t,l);g.fillRect(o,sz/2-t/2,l,t);return c.toDataURL('image/png')}
+try{
+  const i192=icon(192),i512=icon(512);
+  const base=location.href.split('#')[0].split('?')[0];
+  const man={name:'PharmaStock – Pharmacy & Warehouse Inventory',short_name:'PharmaStock',start_url:base,scope:base.replace(/[^/]*$/,''),display:'standalone',background_color:'#0f766e',theme_color:'#0f766e',
+    icons:[{src:i192,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:i512,sizes:'512x512',type:'image/png',purpose:'any maskable'}]};
+  const add=(rel,href,extra)=>{const l=document.createElement('link');l.rel=rel;l.href=href;if(extra)l.sizes=extra;document.head.appendChild(l)};
+  add('icon',i192);add('apple-touch-icon',i192);
+  add('manifest',URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/manifest+json'})));
+}catch(_){}
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
+/* ================= boot ================= */
+(async()=>{
+  const s=await dbGet('state');
+  if(s&&s.products)S={products:s.products,batches:s.batches||[],entries:s.entries||[],settings:{...DEF,...s.settings}};
+  applyTheme();recompute();net();render();
+  navigator.storage?.persist?.();
+})();
+</script>
+</body>
+</html>
